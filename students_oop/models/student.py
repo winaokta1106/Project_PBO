@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from exceptions.custom_exceptions import InvalidScoreError, InvalidDataError
 
-class BaseEntity(ABC):                  # abstract class
+class BaseEntity(ABC):
     """Abstract base class untuk semua entitas data."""
 
     @abstractmethod
@@ -16,7 +16,7 @@ class BaseEntity(ABC):                  # abstract class
         pass
 
 
-class GradeMixin:                               
+class GradeMixin:
     """Mixin class untuk logika grade."""
 
     def get_grade(self, average: float) -> str:
@@ -50,7 +50,7 @@ class Student(BaseEntity, GradeMixin):
     VALID_GENDERS = {'male', 'female'}
     VALID_LUNCH = {'standard', 'free/reduced'}
     VALID_TEST_PREP = {'none', 'completed'}
-    _student_count: int = 0                     # private class attribute
+    _student_count: int = 0
 
     def __init__(self,
                  gender: str,
@@ -62,18 +62,67 @@ class Student(BaseEntity, GradeMixin):
                  reading_score: int,
                  writing_score: int):
 
-        self.gender = gender                    # Enkapsulasi (validasi lewat setter)
+        self.gender = gender
         self.race_ethnicity = race_ethnicity
         self.parental_education = parental_education
         self.lunch = lunch
         self.test_prep = test_prep
-        self.math_score = math_score          # setter menjalankan validasi
+        self.math_score = math_score
         self.reading_score = reading_score
         self.writing_score = writing_score
 
         Student._student_count += 1
 
-    @property                           # @property & setter dengan validasi
+    @property
+    def gender(self) -> str:
+        return self.__gender
+
+    @gender.setter
+    def gender(self, value: str):
+        val = str(value).strip().lower()
+        if val not in self.VALID_GENDERS:
+            raise InvalidDataError(f"Gender tidak valid: {value}. Harus salah satu dari {self.VALID_GENDERS}")
+        self.__gender = val
+
+    @property
+    def race_ethnicity(self) -> str:
+        return self.__race_ethnicity
+
+    @race_ethnicity.setter
+    def race_ethnicity(self, value: str):
+        self.__race_ethnicity = str(value).strip()
+
+    @property
+    def parental_education(self) -> str:
+        return self.__parental_education
+
+    @parental_education.setter
+    def parental_education(self, value: str):
+        self.__parental_education = str(value).strip()
+
+    @property
+    def lunch(self) -> str:
+        return self.__lunch
+
+    @lunch.setter
+    def lunch(self, value: str):
+        val = str(value).strip().lower()
+        if val not in self.VALID_LUNCH:
+            raise InvalidDataError(f"Lunch tidak valid: {value}. Harus salah satu dari {self.VALID_LUNCH}")
+        self.__lunch = val
+
+    @property
+    def test_prep(self) -> str:
+        return self.__test_prep
+
+    @test_prep.setter
+    def test_prep(self, value: str):
+        val = str(value).strip().lower()
+        if val not in self.VALID_TEST_PREP:
+            raise InvalidDataError(f"Test preparation tidak valid: {value}. Harus salah satu dari {self.VALID_TEST_PREP}")
+        self.__test_prep = val
+
+    @property
     def math_score(self) -> int:
         return self.__math_score
 
@@ -105,7 +154,7 @@ class Student(BaseEntity, GradeMixin):
             raise InvalidScoreError(value, "writing_score")
         self.__writing_score = int(value)
 
-    def average_score(self) -> float:           # Instance methods
+    def average_score(self) -> float:
         """Hitung rata-rata nilai dari tiga mata pelajaran."""
         return (self.__math_score + self.__reading_score + self.__writing_score) / 3
 
@@ -134,7 +183,7 @@ class Student(BaseEntity, GradeMixin):
     def reset_count(cls):
         cls._student_count = 0
 
-    def to_dict(self) -> dict:                      
+    def to_dict(self) -> dict:
         return {
             'gender': self.gender,
             'race_ethnicity': self.race_ethnicity,
@@ -155,7 +204,7 @@ class Student(BaseEntity, GradeMixin):
                 f"Avg: {avg:.1f} | Grade: {self.get_grade(avg)} "
                 f"({self.get_predikat(avg)})")
 
-    def __str__(self) -> str:                   # implementasi magic methods (dimateri 9)
+    def __str__(self) -> str:
         avg = self.average_score()
         return (f"Student(gender={self.gender}, "
                 f"avg={avg:.1f}, grade={self.get_grade(avg)}, "

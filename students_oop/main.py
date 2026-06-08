@@ -27,28 +27,26 @@ def main():
     config.set_filepath(os.path.join(base_dir, "data", "StudentsPerformance.csv"))
     print(f"\n📁 Konfigurasi: {config}")
 
-# pattren
     event_bus = AnalysisEventBus()
     logger    = ConsoleLogger()
     collector = SummaryCollector()
     event_bus.subscribe(logger)
     event_bus.subscribe(collector)
 
-# Exception Handling 
     try:  
-        print("\n📂 Memuat dataset...")                         # buat membaca CSV dataset nya
+        print("\n📂 Memuat dataset...")
         repo     = StudentRepository(config.filepath)
         students = repo.load_from_csv()
-        print(f"\n🔍 Contoh objek Student pertama:")            # Magic Methods
+        print(f"\n🔍 Contoh objek Student pertama:")
         print(f"   __str__ : {students[0]}")
         print(f"   __repr__: {repr(students[0])}")
         print(f"   summary : {students[0].summary()}")
-        print(f"\n📌 Total instance Student dibuat: {students[0].get_student_count()}")         # Class method
-        analyzer        = ScoreAnalyzer(students)                                           # Polimorfisme (analyzer umum, analyzer per gender)
+        print(f"\n📌 Total instance Student dibuat: {students[0].get_student_count()}")
+        analyzer        = ScoreAnalyzer(students)
         analyzer_female = GenderScoreAnalyzer(students, 'female')
         analyzer_male   = GenderScoreAnalyzer(students, 'male')
 
-        print("\n" + "─" * 60)                          # Analisis Utamanya (Sang bintang dari analisis ini)
+        print("\n" + "─" * 60)
         summary = analyzer.summary_dict()
         for k, v in summary.items():
             print(f"   {k:<35}: {v}")
@@ -57,7 +55,7 @@ def main():
         for k, v in analyzer.test_prep_impact().items():
             print(f"   {k:<20}: {v}")
 
-        print("\n📊 Rata-rata Nilai per Pendidikan Orang Tua:")
+        print("\n%s" % "📊 Rata-rata Nilai per Pendidikan Orang Tua:")
         for edu, avg in analyzer.parental_education_impact().items():
             print(f"   {edu:<40}: {avg}")
 
@@ -69,13 +67,13 @@ def main():
         print("   PEREMPUAN:", analyzer_female.summary_dict())
         print("   LAKI-LAKI:", analyzer_male.summary_dict())
 
-        event_bus.notify("analisis_selesai", {                  # Observer notify
+        event_bus.notify("analisis_selesai", {
             "total_siswa": len(students),
             "pass_rate": f"{analyzer.pass_rate():.1f}%",
             "overall_avg": f"{analyzer.overall_average():.2f}",
         })
 
-        print("\n" + "─" * 60)                      # Factory Pattern
+        print("\n" + "─" * 60)
         print("📝 Membuat laporan...\n")
         factory     = ReportFactory()
         text_report = factory.create("text")
@@ -90,7 +88,7 @@ def main():
 
         repo.save_to_json(os.path.join(output_dir, "students_data.json"))
 
-        viz = Visualizer(students, output_dir=output_dir)         # Visualisasi
+        viz = Visualizer(students, output_dir=output_dir)
         viz.generate_all()
 
         print("\n✅ Selesai! Cek folder output/ untuk hasil.")
