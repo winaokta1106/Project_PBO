@@ -1,8 +1,12 @@
 import os
 import sys
 
-# Tambah root ke sys.path agar import antar folder bekerja
 sys.path.insert(0, os.path.dirname(__file__))
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
 
 from patterns.design_patterns import DataConfig, AnalysisEventBus, ConsoleLogger, SummaryCollector, ReportFactory
 from repositories.student_repository import StudentRepository
@@ -18,8 +22,9 @@ def main():
     print("  Universitas Mulawarman — PBO 2026")
     print("=" * 60)
 
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     config = DataConfig()
-    config.set_filepath("data/StudentsPerformance.csv")
+    config.set_filepath(os.path.join(base_dir, "data", "StudentsPerformance.csv"))
     print(f"\n📁 Konfigurasi: {config}")
 
 # pattren
@@ -77,14 +82,15 @@ def main():
         print(text_report.generate(summary))
 
         md_report = factory.create("markdown")
-        os.makedirs("output", exist_ok=True)
-        with open("output/laporan.md", "w", encoding="utf-8") as f:
+        output_dir = os.path.join(base_dir, "output")
+        os.makedirs(output_dir, exist_ok=True)
+        with open(os.path.join(output_dir, "laporan.md"), "w", encoding="utf-8") as f:
             f.write(md_report.generate(summary))
-        print("   📄 Laporan Markdown tersimpan: output/laporan.md")
+        print(f"   📄 Laporan Markdown tersimpan: {os.path.join(output_dir, 'laporan.md')}")
 
-        repo.save_to_json("output/students_data.json")
+        repo.save_to_json(os.path.join(output_dir, "students_data.json"))
 
-        viz = Visualizer(students, output_dir="output")         # Visualisasi
+        viz = Visualizer(students, output_dir=output_dir)         # Visualisasi
         viz.generate_all()
 
         print("\n✅ Selesai! Cek folder output/ untuk hasil.")
